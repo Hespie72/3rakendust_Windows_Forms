@@ -58,6 +58,12 @@
     <Compile Include="FotoViewer.Designer.cs">
       <DependentUpon>FotoViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="matchgame.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="matchgame.Designer.cs">
+      <DependentUpon>matchgame.cs</DependentUpon>
+    </Compile>
     <Compile Include="mathquizz.cs">
       <SubType>Form</SubType>
     </Compile>

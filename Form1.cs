@@ -26,21 +26,24 @@ namespace _3rakendust_Windows_Forms
 
             nuppFoto = new Button();
             nuppFoto.Text = "Ava pildi näita aken";
-            nuppFoto.Location = new Point(50, 30);
+            nuppFoto.Location = new Point(300, 30);
             nuppFoto.Size = new Size(280, 40);
             nuppFoto.Click += NuppFoto_Click;
+            nuppFoto.BackColor = Color.IndianRed;
 
             nuppMat = new Button();
             nuppMat.Text = "Ava matematika ülessaned aken";
-            nuppMat.Location = new Point(50, 80);
+            nuppMat.Location = new Point(300, 80);
             nuppMat.Size = new Size(280, 40);
             nuppMat.Click += NuppMat_Click;
+            nuppMat.BackColor = Color.GreenYellow;
 
             nuppMang= new Button();
             nuppMang.Text = "Ava mängu aken";
-            nuppMang.Location = new Point(50, 130);
+            nuppMang.Location = new Point(300, 130);
             nuppMang.Size = new Size(280, 40);
             nuppMang.Click += NuppMang_Click;
+            nuppMang.BackColor = Color.LightSeaGreen;
 
             Controls.Add(nuppFoto);
             Controls.Add(nuppMat);
@@ -49,7 +52,8 @@ namespace _3rakendust_Windows_Forms
 
         private void NuppMang_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            matchgame mgame = new matchgame("Sobitamismäng", 1000, 600);
+            mgame.Show();
         }
 
         private void NuppMat_Click(object sender, EventArgs e)
