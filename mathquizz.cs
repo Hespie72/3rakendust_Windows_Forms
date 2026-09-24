@@ -27,7 +27,10 @@ namespace _3rakendust_Windows_Forms
         NumericUpDown quotient;
         Button startbutton;
         Timer quizztime;
-        
+
+        int score = 0;
+        ComboBox difficultyBox;
+        Label scoreLabel;
 
         int addend1;
         int addend2;
@@ -47,14 +50,14 @@ namespace _3rakendust_Windows_Forms
             this.StartPosition = FormStartPosition.CenterScreen;
 
             Label timeTextLabel = new Label();
-            timeTextLabel.Text = "Time Left";
+            timeTextLabel.Text = "Jäänud aeg";
             timeTextLabel.Font = new Font("Arial", 15);
             timeTextLabel.AutoSize = true;
             timeTextLabel.Location = new Point(230, 20);
             this.Controls.Add(timeTextLabel);
 
             tlabel = new Label();
-            tlabel.Text = "30 seconds";
+            tlabel.Text = "30 sekundit";
             tlabel.Font = new Font("Arial", 15);
             tlabel.AutoSize = true;
             tlabel.Location = new Point(330, 20);
@@ -232,9 +235,32 @@ namespace _3rakendust_Windows_Forms
             quotient.TabIndex = 4;
             Controls.Add(quotient);
 
+            scoreLabel = new Label();
+            scoreLabel.Text = "Skoor: 0";
+            scoreLabel.Font = new Font("Arial", 15);
+            scoreLabel.AutoSize = true;
+            scoreLabel.Location = new Point(330, 50);
+            this.Controls.Add(scoreLabel);
+
+            Label difficultyLabel = new Label();
+            difficultyLabel.Text = "Raskusaste";
+            difficultyLabel.Font = new Font("Arial", 12);
+            difficultyLabel.AutoSize = true;
+            difficultyLabel.Location = new Point(500, 20);
+            this.Controls.Add(difficultyLabel);
+
+            difficultyBox = new ComboBox();
+            difficultyBox.Items.Add("Lihtne");
+            difficultyBox.Items.Add("Keskmine");
+            difficultyBox.Items.Add("Raske");
+            difficultyBox.SelectedIndex = 0;
+            difficultyBox.Location = new Point(500, 45);
+            difficultyBox.Width = 120;
+            this.Controls.Add(difficultyBox);
+
 
             startbutton = new Button();
-            startbutton.Text = "Start the quizz";
+            startbutton.Text = "Alusta viktoriini";
             startbutton.Font = new Font("Arial", 14);
             startbutton.AutoSize = true;
             startbutton.TabIndex = 0;
@@ -302,34 +328,37 @@ namespace _3rakendust_Windows_Forms
         {
             if (CheckTheAnswer())
             {
-                // If CheckTheAnswer() returns true, then the user 
-                // got the answer right. Stop the timer  
-                // and show a MessageBox.
                 quizztime.Stop();
-                MessageBox.Show("You got all the answers right!",
-                                "Congratulations!");
+
+                score++;
+                scoreLabel.Text = "Skoor: " + score;
+
+                MessageBox.Show(
+                    "Sa vastasid kõigile õigesti!\nSkoor: " + score,
+                    "Palju õnne!");
+
                 startbutton.Enabled = true;
             }
             else if (timeLeft > 0)
             {
-                // If CheckTheAnswer() returns false, keep counting
-                // down. Decrease the time left by one second and 
-                // display the new time left by updating the 
-                // Time Left label.
                 timeLeft = timeLeft - 1;
-                tlabel.Text = timeLeft + " seconds";
+                tlabel.Text = timeLeft + " sekundit";
             }
             else
             {
-                // If the user ran out of time, stop the timer, show
-                // a MessageBox, and fill in the answers.
                 quizztime.Stop();
-                tlabel.Text = "Time's up!";
-                MessageBox.Show("You didn't finish in time.", "Sorry!");
+
+                tlabel.Text = "Aeg sai otsa!";
+
+                MessageBox.Show(
+                    "Sa ei lõpetanud aja jooksul.\nSkoor: " + score,
+                    "Vabandust!");
+
                 sum.Value = addend1 + addend2;
                 difference.Value = minuend - subtrahend;
                 product.Value = multiplicand * multiplier;
                 quotient.Value = dividend / divisor;
+
                 startbutton.Enabled = true;
             }
         }
@@ -337,48 +366,60 @@ namespace _3rakendust_Windows_Forms
         //start quizz
         public void StartTheQuiz()
         {
-            // Fill in the addition problem.
-            // Generate two random numbers to add.
-            // Store the values in the variables 'addend1' and 'addend2'.
-            addend1 = randomizer.Next(51);
-            addend2 = randomizer.Next(51);
+            int maxNumber;
 
-            // Convert the two randomly generated numbers
-            // into strings so that they can be displayed
-            // in the label controls.
+            if (difficultyBox.SelectedIndex == 0)
+            {
+                maxNumber = 100;
+            }
+            else if (difficultyBox.SelectedIndex == 1)
+            {
+                maxNumber = 500;
+            }
+            else
+            {
+                maxNumber = 1000;
+            }
+
+            addend1 = randomizer.Next(1, maxNumber / 2 + 1);
+            addend2 = randomizer.Next(1, maxNumber / 2 + 1);
+
             pllabel.Text = addend1.ToString();
             prlabel.Text = addend2.ToString();
 
-            // 'sum' is the name of the NumericUpDown control.
-            // This step makes sure its value is zero before
-            // adding any values to it.
             sum.Value = 0;
 
-            // Fill in the subtraction problem.
-            minuend = randomizer.Next(1, 101);
+            minuend = randomizer.Next(2, maxNumber + 1);
             subtrahend = randomizer.Next(1, minuend);
+
             mllabel.Text = minuend.ToString();
             mrlabel.Text = subtrahend.ToString();
+
             difference.Value = 0;
 
-            // Fill in the multiplication problem.
-            multiplicand = randomizer.Next(2, 11);
-            multiplier = randomizer.Next(2, 11);
+            int multiplicationMax = (int)Math.Sqrt(maxNumber);
+
+            multiplicand = randomizer.Next(2, multiplicationMax + 1);
+            multiplier = randomizer.Next(2, multiplicationMax + 1);
+
             tllabel.Text = multiplicand.ToString();
             trlabel.Text = multiplier.ToString();
+
             product.Value = 0;
 
-            // Fill in the division problem.
-            divisor = randomizer.Next(2, 11);
-            int temporaryQuotient = randomizer.Next(2, 11);
+            divisor = randomizer.Next(2, multiplicationMax + 1);
+            int temporaryQuotient = randomizer.Next(2, multiplicationMax + 1);
+
             dividend = divisor * temporaryQuotient;
+
             dllabel.Text = dividend.ToString();
             drlabel.Text = divisor.ToString();
+
             quotient.Value = 0;
 
-            // Start the timer.
             timeLeft = 30;
-            tlabel.Text = "30 seconds";
+            tlabel.Text = "30 sekundit";
+
             quizztime.Start();
         }
 
