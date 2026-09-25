@@ -27,6 +27,14 @@ namespace _3rakendust_Windows_Forms
 
         Timer timer = new Timer();
 
+        Timer gameTimer = new Timer();
+        int timeLeft = 60;
+
+        int errors = 0;
+
+        Label timeLabel;
+        Label errorsLabel;
+
         public matchgame(string Name, int width, int height)
         {
             this.Text = Name;
@@ -38,10 +46,29 @@ namespace _3rakendust_Windows_Forms
             Text = "Sobitamismäng";
             Size = new Size(550, 550);
 
+            timeLabel = new Label();
+            timeLabel.Text = "Aeg: 60";
+            timeLabel.Font = new Font("Arial", 14, FontStyle.Bold);
+            timeLabel.AutoSize = true;
+            timeLabel.Location = new Point(10, 10);
+            Controls.Add(timeLabel);
+
+            errorsLabel = new Label();
+            errorsLabel.Text = "Vead: 0";
+            errorsLabel.Font = new Font("Arial", 14, FontStyle.Bold);
+            errorsLabel.AutoSize = true;
+            errorsLabel.Location = new Point(400, 10);
+            Controls.Add(errorsLabel);
+
             CreateGameBoard();
 
             timer.Interval = 750;
             timer.Tick += Timer_Tick;
+
+            gameTimer.Interval = 1000;
+            gameTimer.Tick += GameTimer_Tick;
+
+            gameTimer.Start();
         }
 
         private void CreateGameBoard()
@@ -49,7 +76,7 @@ namespace _3rakendust_Windows_Forms
             TableLayoutPanel table = new TableLayoutPanel();
 
             table.Dock = DockStyle.Fill;
-            table.BackColor = Color.CornflowerBlue;
+            table.BackColor = Color.Orange;
             table.CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset;
 
             table.ColumnCount = 4;
@@ -73,7 +100,7 @@ namespace _3rakendust_Windows_Forms
                 Label label = new Label();
 
                 label.Dock = DockStyle.Fill;
-                label.BackColor = Color.CornflowerBlue;
+                label.BackColor = Color.Orange;
                 label.AutoSize = false;
                 label.TextAlign = ContentAlignment.MiddleCenter;
 
@@ -114,6 +141,9 @@ namespace _3rakendust_Windows_Forms
             if (timer.Enabled)
                 return;
 
+            if (gameTimer.Enabled == false)
+                return;
+
             if (clickedLabel.Text != "")
                 return;
 
@@ -145,6 +175,9 @@ namespace _3rakendust_Windows_Forms
             }
             else
             {
+                errors++;
+                errorsLabel.Text = "Vead: " + errors;
+
                 timer.Start();
             }
         }
@@ -160,21 +193,64 @@ namespace _3rakendust_Windows_Forms
             secondClicked = null;
         }
 
+        private void GameTimer_Tick(object sender, EventArgs e)
+        {
+            timeLeft--;
+
+            timeLabel.Text = "Aeg: " + timeLeft;
+
+            if (timeLeft <= 0)
+            {
+                gameTimer.Stop();
+
+                MessageBox.Show(
+                    "Aeg sai otsa!\nVead: " + errors,
+                    "Mäng läbi"
+                );
+
+                DisableGame();
+            }
+        }
+
         private void CheckGameFinished()
         {
-            foreach (Control control in Controls[0].Controls)
+            foreach (Control control in Controls)
             {
-                Label label = control as Label;
+                if (control is TableLayoutPanel table)
+                {
+                    foreach (Control card in table.Controls)
+                    {
+                        Label label = card as Label;
 
-                if (label != null && label.Text == "")
-                    return;
+                        if (label != null && label.Text == "")
+                            return;
+                    }
+                }
             }
 
+            gameTimer.Stop();
+
             MessageBox.Show(
-                "Sa sobitasid kõik ikoonid!",
+                "Sa sobitasid kõik ikoonid!\nVead: " + errors,
                 "Palju õnne!"
             );
+        }
 
+        private void DisableGame()
+        {
+            foreach (Control control in Controls)
+            {
+                if (control is TableLayoutPanel table)
+                {
+                    foreach (Control card in table.Controls)
+                    {
+                        Label label = card as Label;
+
+                        if (label != null)
+                            label.Enabled = false;
+                    }
+                }
+            }
         }
     }
 }

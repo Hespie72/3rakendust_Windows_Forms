@@ -53,7 +53,7 @@ namespace _3rakendust_Windows_Forms
             timeTextLabel.Text = "Jäänud aeg";
             timeTextLabel.Font = new Font("Arial", 15);
             timeTextLabel.AutoSize = true;
-            timeTextLabel.Location = new Point(230, 20);
+            timeTextLabel.Location = new Point(220, 20);
             this.Controls.Add(timeTextLabel);
 
             tlabel = new Label();
@@ -236,7 +236,7 @@ namespace _3rakendust_Windows_Forms
             Controls.Add(quotient);
 
             scoreLabel = new Label();
-            scoreLabel.Text = "Skoor: 0";
+            scoreLabel.Text = "Punktid: 0";
             scoreLabel.Font = new Font("Arial", 15);
             scoreLabel.AutoSize = true;
             scoreLabel.Location = new Point(330, 50);
@@ -268,7 +268,91 @@ namespace _3rakendust_Windows_Forms
             startbutton.MouseClick += Startbutton_MouseClick;
             Controls.Add(startbutton);
 
+            Button valmisbutton = new Button();
+            valmisbutton.Text = "Valmis";
+            valmisbutton.Font = new Font("Arial", 14);
+            valmisbutton.AutoSize = true;
+            valmisbutton.Location = new Point(500, 350);
+            valmisbutton.Click += Valmisbutton_Click;
+            Controls.Add(valmisbutton);
+
             int d = 0;
+        }
+
+        private void Valmisbutton_Click(object sender, EventArgs e)
+        {
+            quizztime.Stop();
+
+            int correct = 0;
+            int wrong = 0;
+            int points = 0;
+
+            int pointsForAnswer;
+
+            if (difficultyBox.SelectedIndex == 0)
+                pointsForAnswer = 1;
+            else if (difficultyBox.SelectedIndex == 1)
+                pointsForAnswer = 2;
+            else
+                pointsForAnswer = 5;
+
+            if (addend1 + addend2 == sum.Value)
+            {
+                correct++;
+                points += pointsForAnswer;
+                sum.BackColor = Color.Green;
+            }
+            else
+            {
+                wrong++;
+                sum.BackColor = Color.Red;
+            }
+
+            if (minuend - subtrahend == difference.Value)
+            {
+                correct++;
+                points += pointsForAnswer;
+                difference.BackColor = Color.Green;
+            }
+            else
+            {
+                wrong++;
+                difference.BackColor = Color.Red;
+            }
+
+            if (multiplicand * multiplier == product.Value)
+            {
+                correct++;
+                points += pointsForAnswer;
+                product.BackColor = Color.Green;
+            }
+            else
+            {
+                wrong++;
+                product.BackColor = Color.Red;
+            }
+
+            if (dividend / divisor == quotient.Value)
+            {
+                correct++;
+                points += pointsForAnswer;
+                quotient.BackColor = Color.Green;
+            }
+            else
+            {
+                wrong++;
+                quotient.BackColor = Color.Red;
+            }
+
+            score += points;
+            scoreLabel.Text = "Punktid: " + score;
+
+            MessageBox.Show(
+                "Õiged vastused: " + correct +
+                "\nValed vastused: " + wrong +
+                "\nPunkte: " + points,
+                "Tulemus"
+            );
         }
 
         private void Sum_MouseClick(object sender, MouseEventArgs e)
@@ -309,39 +393,17 @@ namespace _3rakendust_Windows_Forms
 
         private void Startbutton_MouseClick(object sender, MouseEventArgs e)
         {
+            sum.BackColor = Color.White;
+            difference.BackColor = Color.White;
+            product.BackColor = Color.White;
+            quotient.BackColor = Color.White;
             StartTheQuiz();
-            startbutton.Enabled = false;
         }
-
-        private bool CheckTheAnswer()
-        {
-            if ((addend1 + addend2 == sum.Value)
-                && (minuend - subtrahend == difference.Value)
-                && (multiplicand * multiplier == product.Value)
-                && (dividend / divisor == quotient.Value))
-                return true;
-            else
-                return false;
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (CheckTheAnswer())
+            if (timeLeft > 0)
             {
-                quizztime.Stop();
-
-                score++;
-                scoreLabel.Text = "Skoor: " + score;
-
-                MessageBox.Show(
-                    "Sa vastasid kõigile õigesti!\nSkoor: " + score,
-                    "Palju õnne!");
-
-                startbutton.Enabled = true;
-            }
-            else if (timeLeft > 0)
-            {
-                timeLeft = timeLeft - 1;
+                timeLeft--;
                 tlabel.Text = timeLeft + " sekundit";
             }
             else
@@ -351,15 +413,9 @@ namespace _3rakendust_Windows_Forms
                 tlabel.Text = "Aeg sai otsa!";
 
                 MessageBox.Show(
-                    "Sa ei lõpetanud aja jooksul.\nSkoor: " + score,
-                    "Vabandust!");
-
-                sum.Value = addend1 + addend2;
-                difference.Value = minuend - subtrahend;
-                product.Value = multiplicand * multiplier;
-                quotient.Value = dividend / divisor;
-
-                startbutton.Enabled = true;
+                    "Aeg sai otsa!",
+                    "Valmis"
+                );
             }
         }
 
@@ -380,6 +436,11 @@ namespace _3rakendust_Windows_Forms
             {
                 maxNumber = 1000;
             }
+
+            sum.Maximum = maxNumber;
+            difference.Maximum = maxNumber;
+            product.Maximum = maxNumber;
+            quotient.Maximum = maxNumber;
 
             addend1 = randomizer.Next(1, maxNumber / 2 + 1);
             addend2 = randomizer.Next(1, maxNumber / 2 + 1);
@@ -409,7 +470,7 @@ namespace _3rakendust_Windows_Forms
 
             divisor = randomizer.Next(2, multiplicationMax + 1);
             int temporaryQuotient = randomizer.Next(2, multiplicationMax + 1);
-
+                
             dividend = divisor * temporaryQuotient;
 
             dllabel.Text = dividend.ToString();

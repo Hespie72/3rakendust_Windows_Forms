@@ -20,6 +20,10 @@ namespace _3rakendust_Windows_Forms
         private Button slideshowButton;
         private Button saveButton;
 
+        private Button paintButton;
+        private bool isPainting = false;
+        private Point lastPoint;
+
         private CheckBox stretchCheckBox;
 
         private OpenFileDialog openFileDialog1;
@@ -38,10 +42,15 @@ namespace _3rakendust_Windows_Forms
             Height = height;
 
             CreateInterface();
+            pctbox.SizeMode = PictureBoxSizeMode.Zoom;
+            pctbox.MouseDown += Pctbox_MouseDown;
+            pctbox.MouseMove += Pctbox_MouseMove;
         }
 
         private void CreateInterface()
         {
+            
+
             tblp = new TableLayoutPanel();
 
             tblp.Dock = DockStyle.Fill;
@@ -115,6 +124,12 @@ namespace _3rakendust_Windows_Forms
             closeButton.AutoSize = true;
             closeButton.Click += CloseButton_Click;
 
+            paintButton = new Button();
+            paintButton.Text = "Joonista";
+            paintButton.AutoSize = true;
+            paintButton.Click += PaintButton_Click;
+
+            flowLayoutPanel1.Controls.Add(paintButton);
             flowLayoutPanel1.Controls.Add(closeButton);
             flowLayoutPanel1.Controls.Add(saveButton);
             flowLayoutPanel1.Controls.Add(slideshowButton);
@@ -142,6 +157,45 @@ namespace _3rakendust_Windows_Forms
             slideshowTimer = new Timer();
             slideshowTimer.Interval = 2000;
             slideshowTimer.Tick += SlideshowTimer_Tick;
+        }
+
+        private void Pctbox_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (!isPainting)
+                return;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                lastPoint = e.Location;
+            }
+        }
+
+        private void Pctbox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isPainting)
+                return;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                using (Graphics g = pctbox.CreateGraphics())
+                {
+                    using (Pen pen = new Pen(Color.Black, 5))
+                    {
+                        g.DrawLine(pen, lastPoint, e.Location);
+                    }
+                }
+
+                lastPoint = e.Location;
+            }
+        }
+        private void PaintButton_Click(object sender, EventArgs e)
+        {
+            isPainting = !isPainting;
+
+            if (isPainting)
+                paintButton.Text = "Peata joonistamine";
+            else
+                paintButton.Text = "Joonista";
         }
 
         private void ShowButton_Click(object sender, EventArgs e)
