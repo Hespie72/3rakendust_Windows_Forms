@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
@@ -22,7 +23,10 @@ namespace _3rakendust_Windows_Forms
 
         private Button paintButton;
         private bool isPainting = false;
-        private Point lastPoint;
+        private PointF lastImagePoint; // последняя точка в координатах ИЗОБРАЖЕНИЯ
+
+        // НОВОЕ: кнопка поворота изображения
+        private Button rotateButton;
 
         private CheckBox stretchCheckBox;
 
@@ -49,8 +53,6 @@ namespace _3rakendust_Windows_Forms
 
         private void CreateInterface()
         {
-            
-
             tblp = new TableLayoutPanel();
 
             tblp.Dock = DockStyle.Fill;
@@ -129,6 +131,14 @@ namespace _3rakendust_Windows_Forms
             paintButton.AutoSize = true;
             paintButton.Click += PaintButton_Click;
 
+            // НОВОЕ: создание кнопки поворота
+            rotateButton = new Button();
+            rotateButton.Text = "Pööra";
+            rotateButton.AutoSize = true;
+            rotateButton.Click += RotateButton_Click;
+
+            // НОВОЕ: добавление кнопки поворота в панель
+            flowLayoutPanel1.Controls.Add(rotateButton);
             flowLayoutPanel1.Controls.Add(paintButton);
             flowLayoutPanel1.Controls.Add(closeButton);
             flowLayoutPanel1.Controls.Add(saveButton);
@@ -159,34 +169,130 @@ namespace _3rakendust_Windows_Forms
             slideshowTimer.Tick += SlideshowTimer_Tick;
         }
 
-        private void Pctbox_MouseDown(object sender, MouseEventArgs e)
+        // НОВОЕ: поворот изображения на 90 градусов по часовой стрелке
+        private void RotateButton_Click(object sender, EventArgs e)
         {
-            if (!isPainting)
+            if (pctbox.Image == null)
+            {
+                MessageBox.Show("Pilt puudub.");
+                return;
+            }
+
+            // Image в списке images - тот же объект, поэтому поворот сохранится
+            // и в слайдшоу, и при сохранении файла
+            pctbox.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            pctbox.Refresh();
+        }
+
+        // Переводит координаты мыши (в PictureBox) в координаты самого изображения.
+        // Учитывает режимы Zoom (с полями по краям) и StretchImage.
+        private bool TryGetImagePoint(Point p, out PointF result, out float scale)
+        {
+            result = PointF.Empty;
+            scale = 1f;
+
+            Image img = pctbox.Image;
+            if (img == null)
+                return false;
+
+            Rectangle cr = pctbox.ClientRectangle;
+            if (cr.Width <= 0 || cr.Height <= 0)
+                return false;
+
+            if (pctbox.SizeMode == PictureBoxSizeMode.StretchImage)
+            {
+                float sx = (float)cr.Width / img.Width;
+                float sy = (float)cr.Height / img.Height;
+
+                result = new PointF(p.X / sx, p.Y / sy);
+                scale = (sx + sy) / 2f;
+            }
+            else // Zoom
+            {
+                scale = Math.Min(
+                    (float)cr.Width / img.Width,
+                    (float)cr.Height / img.Height);
+
+                float offsetX = (cr.Width - img.Width * scale) / 2f;
+                float offsetY = (cr.Height - img.Height * scale) / 2f;
+
+                result = new PointF(
+                    (p.X - offsetX) / scale,
+                    (p.Y - offsetY) / scale);
+            }
+
+            return true;
+        }
+
+        // Рисует прямо на Bitmap, поэтому рисунок не пропадает при перерисовке,
+        // переключении слайдов, повороте и попадает в сохранённый файл.
+        private void DrawOnImage(PointF from, PointF to, float scale)
+        {
+            if (pctbox.Image == null)
                 return;
 
-            if (e.Button == MouseButtons.Left)
+            float penWidth = 5f / scale; // на экране линия всегда ~5 пикселей
+
+            using (Graphics g = Graphics.FromImage(pctbox.Image))
             {
-                lastPoint = e.Location;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                if (from == to)
+                {
+                    using (Brush brush = new SolidBrush(Color.Black))
+                    {
+                        g.FillEllipse(
+                            brush,
+                            to.X - penWidth / 2f,
+                            to.Y - penWidth / 2f,
+                            penWidth,
+                            penWidth);
+                    }
+                }
+                else
+                {
+                    using (Pen pen = new Pen(Color.Black, penWidth))
+                    {
+                        pen.StartCap = LineCap.Round;
+                        pen.EndCap = LineCap.Round;
+                        pen.LineJoin = LineJoin.Round;
+
+                        g.DrawLine(pen, from, to);
+                    }
+                }
+            }
+
+            pctbox.Invalidate();
+        }
+
+        private void Pctbox_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (!isPainting || e.Button != MouseButtons.Left)
+                return;
+
+            PointF point;
+            float scale;
+
+            if (TryGetImagePoint(e.Location, out point, out scale))
+            {
+                lastImagePoint = point;
+                DrawOnImage(point, point, scale); // точка при простом клике
             }
         }
 
         private void Pctbox_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!isPainting)
+            if (!isPainting || e.Button != MouseButtons.Left)
                 return;
 
-            if (e.Button == MouseButtons.Left)
-            {
-                using (Graphics g = pctbox.CreateGraphics())
-                {
-                    using (Pen pen = new Pen(Color.Black, 5))
-                    {
-                        g.DrawLine(pen, lastPoint, e.Location);
-                    }
-                }
+            PointF point;
+            float scale;
 
-                lastPoint = e.Location;
-            }
+            if (!TryGetImagePoint(e.Location, out point, out scale))
+                return;
+
+            DrawOnImage(lastImagePoint, point, scale);
+            lastImagePoint = point;
         }
         private void PaintButton_Click(object sender, EventArgs e)
         {

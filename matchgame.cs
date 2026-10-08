@@ -35,6 +35,10 @@ namespace _3rakendust_Windows_Forms
         Label timeLabel;
         Label errorsLabel;
 
+        // НОВОЕ: игровое поле и кнопка перезапуска
+        TableLayoutPanel gameTable;
+        Button restartButton;
+
         public matchgame(string Name, int width, int height)
         {
             this.Text = Name;
@@ -59,6 +63,15 @@ namespace _3rakendust_Windows_Forms
             errorsLabel.AutoSize = true;
             errorsLabel.Location = new Point(400, 10);
             Controls.Add(errorsLabel);
+
+            // НОВОЕ: кнопка "Uus mäng"
+            restartButton = new Button();
+            restartButton.Text = "Uus mäng";
+            restartButton.Font = new Font("Arial", 12, FontStyle.Bold);
+            restartButton.AutoSize = true;
+            restartButton.Location = new Point(200, 8);
+            restartButton.Click += RestartButton_Click;
+            Controls.Add(restartButton);
 
             CreateGameBoard();
 
@@ -119,6 +132,9 @@ namespace _3rakendust_Windows_Forms
                 table.Controls.Add(label);
             }
 
+            // НОВОЕ: запоминаем поле, чтобы его можно было пересоздать
+            gameTable = table;
+
             Controls.Add(table);
         }
 
@@ -132,6 +148,37 @@ namespace _3rakendust_Windows_Forms
                 icons[i] = icons[j];
                 icons[j] = temp;
             }
+        }
+
+        // НОВОЕ: обработчик кнопки "Uus mäng"
+        private void RestartButton_Click(object sender, EventArgs e)
+        {
+            RestartGame();
+        }
+
+        // НОВОЕ: полный перезапуск игры
+        private void RestartGame()
+        {
+            timer.Stop();
+            gameTimer.Stop();
+
+            firstClicked = null;
+            secondClicked = null;
+
+            errors = 0;
+            timeLeft = 60;
+            errorsLabel.Text = "Vead: 0";
+            timeLabel.Text = "Aeg: 60";
+
+            // Удаляем старое поле и создаём новое с перемешанными иконками
+            if (gameTable != null)
+            {
+                Controls.Remove(gameTable);
+                gameTable.Dispose();
+            }
+
+            CreateGameBoard();
+            gameTimer.Start();
         }
 
         private void Label_Click(object sender, EventArgs e)

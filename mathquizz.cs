@@ -32,6 +32,9 @@ namespace _3rakendust_Windows_Forms
         ComboBox difficultyBox;
         Label scoreLabel;
 
+        // НОВОЕ: кнопка подсказки
+        Button hintButton;
+
         int addend1;
         int addend2;
         int minuend;
@@ -276,7 +279,50 @@ namespace _3rakendust_Windows_Forms
             valmisbutton.Click += Valmisbutton_Click;
             Controls.Add(valmisbutton);
 
+            // НОВОЕ: кнопка подсказки
+            hintButton = new Button();
+            hintButton.Text = "Vihje (-1 punkt)";
+            hintButton.Font = new Font("Arial", 14);
+            hintButton.AutoSize = true;
+            hintButton.Location = new Point(500, 300);
+            hintButton.Click += HintButton_Click;
+            Controls.Add(hintButton);
+
             int d = 0;
+        }
+
+        // НОВОЕ: подсказка - подставляет правильный ответ в первое пустое поле
+        private void HintButton_Click(object sender, EventArgs e)
+        {
+            if (!quizztime.Enabled)
+            {
+                MessageBox.Show("Alusta kõigepealt viktoriini.");
+                return;
+            }
+
+            NumericUpDown[] fields = { sum, difference, product, quotient };
+            int[] answers =
+            {
+                addend1 + addend2,
+                minuend - subtrahend,
+                multiplicand * multiplier,
+                dividend / divisor
+            };
+
+            for (int i = 0; i < fields.Length; i++)
+            {
+                if (fields[i].Value == 0)
+                {
+                    fields[i].Value = answers[i];
+                    fields[i].BackColor = Color.Khaki;
+
+                    score = Math.Max(0, score - 1);
+                    scoreLabel.Text = "Punktid: " + score;
+                    return;
+                }
+            }
+
+            MessageBox.Show("Kõik väljad on juba täidetud.");
         }
 
         private void Valmisbutton_Click(object sender, EventArgs e)
@@ -470,7 +516,7 @@ namespace _3rakendust_Windows_Forms
 
             divisor = randomizer.Next(2, multiplicationMax + 1);
             int temporaryQuotient = randomizer.Next(2, multiplicationMax + 1);
-                
+
             dividend = divisor * temporaryQuotient;
 
             dllabel.Text = dividend.ToString();
@@ -486,4 +532,3 @@ namespace _3rakendust_Windows_Forms
 
     }
 }
-
