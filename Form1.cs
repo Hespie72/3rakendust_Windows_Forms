@@ -28,7 +28,6 @@ namespace _3rakendust_Windows_Forms
 
         private void CreateInterface()
         {
-            // Главная таблица: 1 колонка, строки по центру
             mainLayout = new TableLayoutPanel();
             mainLayout.Dock = DockStyle.Fill;
             mainLayout.ColumnCount = 1;
@@ -37,16 +36,15 @@ namespace _3rakendust_Windows_Forms
 
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50F)); // верхний отступ
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));     // заголовок
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));     // подзаголовок
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));     // панель кнопок
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50F)); // нижний отступ
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));     // подвал
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
             Controls.Add(mainLayout);
 
-            // Заголовок
             titleLabel = new Label();
             titleLabel.Text = "Vali rakendus";
             titleLabel.Font = new Font("Segoe UI", 26, FontStyle.Bold);
@@ -56,7 +54,6 @@ namespace _3rakendust_Windows_Forms
             titleLabel.Margin = new Padding(0, 0, 0, 5);
             mainLayout.Controls.Add(titleLabel, 0, 1);
 
-            // Подзаголовок
             subtitleLabel = new Label();
             subtitleLabel.Text = "Vali allolevatest võimalustest üks";
             subtitleLabel.Font = new Font("Segoe UI", 11);
@@ -66,7 +63,6 @@ namespace _3rakendust_Windows_Forms
             subtitleLabel.Margin = new Padding(0, 0, 0, 25);
             mainLayout.Controls.Add(subtitleLabel, 0, 2);
 
-            // Панель с кнопками (вертикально, по центру)
             FlowLayoutPanel buttonPanel = new FlowLayoutPanel();
             buttonPanel.FlowDirection = FlowDirection.TopDown;
             buttonPanel.WrapContents = false;
@@ -95,7 +91,6 @@ namespace _3rakendust_Windows_Forms
             buttonPanel.Controls.Add(nuppMat);
             buttonPanel.Controls.Add(nuppMang);
 
-            // Подвал
             Label footer = new Label();
             footer.Text = "3 rakendust • Windows Forms";
             footer.Font = new Font("Segoe UI", 9);
@@ -106,9 +101,6 @@ namespace _3rakendust_Windows_Forms
             mainLayout.Controls.Add(footer, 0, 5);
         }
 
-        /// <summary>
-        /// Создаёт единообразную плоскую кнопку меню с эффектом наведения.
-        /// </summary>
         private Button CreateMenuButton(string text, Color baseColor)
         {
             Button btn = new Button();
